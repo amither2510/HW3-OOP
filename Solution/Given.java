@@ -4,10 +4,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)         //the annotation Given can be use on method
+@Retention(RetentionPolicy.RUNTIME) //the annotation Given "lives" = runtime
 
 public @interface Given {
-//yahav
+//default value?
     String[] value();
 }

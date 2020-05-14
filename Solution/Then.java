@@ -4,8 +4,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)         //the annotation Then can be use on method
+@Retention(RetentionPolicy.RUNTIME) //the annotation Then "lives" = runtime
 
 public @interface Then {
 
