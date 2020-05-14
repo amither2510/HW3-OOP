@@ -23,41 +23,37 @@ public class StoryTesterImpl implements StoryTester {
             cons.setAccessible(true);
             Object testClassInst = cons.newInstance();
             for (String str : lines) {
-              //  String stringWithoutParmas = str.replaceAll("\\&[^ ]* ", "");
-                Method method = findKeyWord(stringWithoutParmas, testClass);
-                paramsArray = findParameters(str);
-                method.invoke(testClassInst,paramsArray);
+                //  String stringWithoutParmas = str.replaceAll("\\&[^ ]* ", "");
+                // Method method = findKeyWord(stringWithoutParmas, testClass);
+                String[] subSentence = str.split(" or ");
+                Method method = findMethodFrom2TypeSentence(subSentence[0], testClass);
+                for (String sub : subSentence) {
+                    paramsArray = findParameters(sub);
+                    method.invoke(testClassInst, paramsArray);
+                }
             }
         }
         catch (Exception e){
 
         }
     }
-    public String stringFormatForEqual(String str ){
-        if(str.contains("and")){
-            String[] new_arr = str.split("and");
-
-        }
-    }
 
     public ArrayList<Object> findParameters(String sentence){
         ArrayList<Object> paramsArray = new ArrayList<>();
-        String[] arrString = sentence.split( " ");
+        String[] arrString = sentence.split( " and ");
         for(String str: arrString){
-            if(str.startsWith("&")){
-                String token = str.replace("&","");
+            String[] arr_str=str.split(" ");
                 try
                 {
-                    Integer parm = Integer.parseInt(token);
-                    paramsArray.add(parm);
+                    Integer param = Integer.parseInt(arr_str[arr_str.length-1]);
+                    paramsArray.add(param);
                 }
                 // then its string
                 catch(NumberFormatException er)
                 {
-                    paramsArray.add(token);
+                    paramsArray.add(arr_str[arr_str.length-1]);
                 }
             }
-        }
         return paramsArray;
     }
 
@@ -65,25 +61,32 @@ public class StoryTesterImpl implements StoryTester {
     public void testOnNestedClasses(String story, Class<?> testClass) throws Exception {
         //TODO: Implement
     }
-    public Method findKeyWord(String str,  Class<?> testClass ) throws Exception{
-        String[] array = str.split(" ", 3);
-        if(array[0].equals("Given")){
-            return getMethodsGivenAnnotation(str,testClass);
-        }
-        else if(array[0].equals("When")){
-           return  getMethodsWhenAnnotation(str,testClass);
-        }
-        else if(array[0].equals("Then")){
-            return getMethodsThenAnnotation(str,testClass);
-        }
-        else{
-            // wrong parse maybe throw exception
-            throw new Exception();
+
+    //stt= keyWord and 2 type sentence
+    public Method findMethodFrom2TypeSentence(String str,  Class<?> testClass ) throws Exception{
+        try {
+            String[] array = str.split(" ", 2);
+            String equal_str = cleanParam(array[1]);
+            if (array[0].equals("Given")) {
+                return getMethodsGivenAnnotation(equal_str, testClass);
+            } else if (array[0].equals("When")) {
+                return getMethodsWhenAnnotation(equal_str, testClass);
+            } else if (array[0].equals("Then")) {
+                return getMethodsThenAnnotation(equal_str, testClass);
+            } else {
+                // wrong parse maybe throw exception
+                throw new Exception();
+            }
+        } catch (Exception e) {  //TODO:: Exception
+            findMethodFrom2TypeSentence(str,testClass.getSuperclass());
         }
     }
 
-
-
+    private String cleanParam(String s) {
+        String[] str = s.split(" and ");
+        return String.join(" and ",Arrays.stream(str).map(m->m.substring(0, m.lastIndexOf(" "))).
+                collect(Collectors.toList()));
+    }
 
 
 
@@ -93,7 +96,7 @@ public class StoryTesterImpl implements StoryTester {
                 //filter annotation
                         filter(m->m.isAnnotationPresent(Given.class)).
                 //filter value annotation
-                        filter(m->(m.getAnnotation(Given.class).value().replaceAll("\\&[^ ]* ", "").
+                        filter(m->(m.getAnnotation(Given.class).value().replaceAll(" \\&[^ ]*", "").
                         equals(annotation_value))).collect(Collectors.toList()).get(0);
     }
     public Method getMethodsWhenAnnotation(String annotation_value, Class<?> testClass){
@@ -103,7 +106,7 @@ public class StoryTesterImpl implements StoryTester {
                         filter(m->m.isAnnotationPresent(When.class)).
                 //filter value annotation
                         filter(m->(m.getAnnotation(When.class).value().
-                        replaceAll("\\&[^ ]* ", "").equals(annotation_value))).
+                        replaceAll(" \\&[^ ]*", "").equals(annotation_value))).
                         collect(Collectors.toList()).get(0);
     }
     public Method getMethodsThenAnnotation(String annotation_value, Class<?> testClass){
@@ -113,7 +116,7 @@ public class StoryTesterImpl implements StoryTester {
                         filter(m->m.isAnnotationPresent(Then.class)).
                 //filter value annotation
                         filter(m->(m.getAnnotation(Then.class).value().
-                        replaceAll("\\&[^ ]* ", "").equals(annotation_value))).
+                        replaceAll(" \\&[^ ]*", "").equals(annotation_value))).
                         collect(Collectors.toList()).get(0);
     }
 }
