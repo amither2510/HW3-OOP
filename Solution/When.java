@@ -6,7 +6,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-
+//amit
 public @interface When {
 
     String[] value();

@@ -17,7 +17,6 @@ import java.util.Arrays;
  * Please don't submit your tests!
  */
 public class DogTest {
-
 	private StoryTester tester;
 	private String goodStory;
 	private String badStory;
