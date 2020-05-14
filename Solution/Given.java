@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 
 public @interface Given {
 //default value?
-    String[] value();
+    String value();
 }

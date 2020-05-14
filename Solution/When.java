@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 //amit
 public @interface When {
 
-    String[] value();
+    String value();
 }
