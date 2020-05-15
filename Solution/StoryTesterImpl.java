@@ -15,11 +15,14 @@ public class StoryTesterImpl implements StoryTester {
         if (story==null || testClass==null) throw new IllegalArgumentException();
         TestClassBackUp backUp = new TestClassBackUp(testClass);
         try {
+
+
             String[] lines = story.split("\n");
             // building the object
             Constructor<?> cons = testClass.getDeclaredConstructor();
             cons.setAccessible(true);
             Object testClassInst = cons.newInstance();
+
             for (String str : lines) {
                 String[] subSentence = str.split(" or ");
                 Method method = findMethodFrom2TypeSentence(subSentence[0], testClass);
@@ -52,11 +55,10 @@ public class StoryTesterImpl implements StoryTester {
     }
 
     private void runSentence(String[] subSentence, Method method, Object testClassInst) {
-        ArrayList<Object> paramsArray = new ArrayList<>();
         for (String sub : subSentence) {
-            paramsArray = findParameters(sub);
+            Object[] paramsArray = findParameters(sub);
             try {
-                method.invoke(testClassInst, paramsArray);
+                method.invoke(testClassInst,paramsArray);
                 break;  //if invoke sucsses break (else Then throw exception)
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -68,7 +70,7 @@ public class StoryTesterImpl implements StoryTester {
     }
 
 
-    public ArrayList<Object> findParameters(String sentence){
+    public Object[] findParameters(String sentence){
         ArrayList<Object> paramsArray = new ArrayList<>();
         String[] arrString = sentence.split( " and ");
         for(String str: arrString){
@@ -84,7 +86,13 @@ public class StoryTesterImpl implements StoryTester {
                     paramsArray.add(arr_str[arr_str.length-1]);
                 }
             }
-        return paramsArray;
+        int i=0;
+        Object[] retObj = new Object[paramsArray.size()];
+        for(Object obj : paramsArray){
+            retObj[i] = obj;
+            i++;
+        }
+        return retObj;
     }
 
 
