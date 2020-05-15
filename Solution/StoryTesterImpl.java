@@ -1,12 +1,10 @@
 package Solution;
 
 import Provided.StoryTester;
+import junit.framework.ComparisonFailure;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -14,29 +12,61 @@ import java.util.stream.Collectors;
 public class StoryTesterImpl implements StoryTester {
     @Override
     public void testOnInheritanceTree(String story, Class<?> testClass) throws Exception {
+        if (story==null || testClass==null) throw new IllegalArgumentException();
+        TestClassBackUp backUp = new TestClassBackUp(testClass);
         try {
             String[] lines = story.split("\n");
-            ArrayList<String> sentence = new ArrayList<>();
-            ArrayList<Object> paramsArray = new ArrayList<>();
             // building the object
             Constructor<?> cons = testClass.getDeclaredConstructor();
             cons.setAccessible(true);
             Object testClassInst = cons.newInstance();
             for (String str : lines) {
-                //  String stringWithoutParmas = str.replaceAll("\\&[^ ]* ", "");
-                // Method method = findKeyWord(stringWithoutParmas, testClass);
                 String[] subSentence = str.split(" or ");
                 Method method = findMethodFrom2TypeSentence(subSentence[0], testClass);
-                for (String sub : subSentence) {
-                    paramsArray = findParameters(sub);
-                    method.invoke(testClassInst, paramsArray);
+                backUpObject(subSentence[0].split(" ",2)[0],backUp,testClassInst);
+                try{
+                    runSentence(subSentence,method,testClassInst);
+                }catch (ComparisonFailure e){
+                    testClassInst= backUp.getObject_backup();
                 }
+
+
+
             }
         }
         catch (Exception e){
 
         }
     }
+
+    private void backUpObject(String s, TestClassBackUp backUp, Object testClassInst) throws IllegalAccessException {
+        if(s.equals("When")){
+            if(!backUp.isFlag_backup()){
+                backUp.setFlag_backup(true);
+                backUp.backUpObject(testClassInst);
+            }
+        }
+        if(s.equals("Then")){
+            backUp.setFlag_backup(false);
+        }
+    }
+
+    private void runSentence(String[] subSentence, Method method, Object testClassInst) {
+        ArrayList<Object> paramsArray = new ArrayList<>();
+        for (String sub : subSentence) {
+            paramsArray = findParameters(sub);
+            try {
+                method.invoke(testClassInst, paramsArray);
+                break;  //if invoke sucsses break (else Then throw exception)
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
 
     public ArrayList<Object> findParameters(String sentence){
         ArrayList<Object> paramsArray = new ArrayList<>();
@@ -57,10 +87,7 @@ public class StoryTesterImpl implements StoryTester {
         return paramsArray;
     }
 
-    @Override
-    public void testOnNestedClasses(String story, Class<?> testClass) throws Exception {
-        //TODO: Implement
-    }
+
 
     //stt= keyWord and 2 type sentence
     public Method findMethodFrom2TypeSentence(String str,  Class<?> testClass ) throws Exception{
@@ -78,7 +105,7 @@ public class StoryTesterImpl implements StoryTester {
                 throw new Exception();
             }
         } catch (Exception e) {  //TODO:: Exception
-            findMethodFrom2TypeSentence(str,testClass.getSuperclass());
+            return findMethodFrom2TypeSentence(str,testClass.getSuperclass());
         }
     }
 
@@ -92,7 +119,7 @@ public class StoryTesterImpl implements StoryTester {
 
     public Method getMethodsGivenAnnotation(String annotation_value, Class<?> testClass){
         //get all methods in testCall set witch When annotation witch annotation_value
-        return Arrays.stream(testClass.getMethods()).
+        return Arrays.stream(testClass.getDeclaredMethods()).
                 //filter annotation
                         filter(m->m.isAnnotationPresent(Given.class)).
                 //filter value annotation
@@ -101,7 +128,7 @@ public class StoryTesterImpl implements StoryTester {
     }
     public Method getMethodsWhenAnnotation(String annotation_value, Class<?> testClass){
         //get all methods in testCall set witch When annotation witch annotation_value
-        return Arrays.stream(testClass.getMethods()).
+        return Arrays.stream(testClass.getDeclaredMethods()).
                 //filter annotation
                         filter(m->m.isAnnotationPresent(When.class)).
                 //filter value annotation
@@ -111,12 +138,17 @@ public class StoryTesterImpl implements StoryTester {
     }
     public Method getMethodsThenAnnotation(String annotation_value, Class<?> testClass){
         //get all methods in testCall set witch When annotation witch annotation_value
-        return Arrays.stream(testClass.getMethods()).
+        return Arrays.stream(testClass.getDeclaredMethods()).
                 //filter annotation
                         filter(m->m.isAnnotationPresent(Then.class)).
                 //filter value annotation
                         filter(m->(m.getAnnotation(Then.class).value().
                         replaceAll(" \\&[^ ]*", "").equals(annotation_value))).
                         collect(Collectors.toList()).get(0);
+    }
+    @Override
+    public void testOnNestedClasses(String story, Class<?> testClass) throws Exception {
+        if (story==null || testClass==null) throw new IllegalArgumentException();
+        //TODO: Implement
     }
 }
