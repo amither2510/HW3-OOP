@@ -29,11 +29,9 @@ public class StoryTesterImpl implements StoryTester {
                 backUpObject(subSentence[0].split(" ",2)[0],backUp,testClassInst);
                 try{
                     runSentence(subSentence,method,testClassInst);
-                }catch (ComparisonFailure e){
+                }catch (InvocationTargetException e){
                     testClassInst= backUp.getObject_backup();
                 }
-
-
 
             }
         }
@@ -54,18 +52,11 @@ public class StoryTesterImpl implements StoryTester {
         }
     }
 
-    private void runSentence(String[] subSentence, Method method, Object testClassInst) {
+    private void runSentence(String[] subSentence, Method method, Object testClassInst) throws InvocationTargetException, IllegalAccessException {
         for (String sub : subSentence) {
             Object[] paramsArray = findParameters(sub);
-            try {
                 method.invoke(testClassInst,paramsArray);
                 break;  //if invoke sucsses break (else Then throw exception)
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-
         }
     }
 

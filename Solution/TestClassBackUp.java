@@ -44,6 +44,7 @@ public class TestClassBackUp {
     }
     public void backUpObject(Object object) throws IllegalAccessException {
         flag_backup=true;
+        //Field[] fields = object.getClass().getFields();
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field f : fields) {
             f.setAccessible(true);
@@ -63,7 +64,7 @@ public class TestClassBackUp {
                                 try {
                                     f.set(object_backup, cons.newInstance(f));
                                 } catch (InstantiationException instantiationException) {
-                                    f.set(object_backup, f);
+                                    f.set(object_backup, f.get(object));
                                 } catch (InvocationTargetException invocationTargetException) {
                                     invocationTargetException.printStackTrace();
                                 }
@@ -74,10 +75,20 @@ public class TestClassBackUp {
                             e.printStackTrace();
                         }
                     }
-
+                }
+                try {
+                    Constructor<?> cons = null;
+                    cons = f.getClass().getDeclaredConstructor(f.getClass());
+                    cons.setAccessible(true);
+                    f.set(object_backup, cons.newInstance(f));
+                } catch (NoSuchMethodException e) {
+                    f.set(object_backup, f.get(object));
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 }
-
