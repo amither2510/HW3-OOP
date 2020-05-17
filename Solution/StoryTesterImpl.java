@@ -59,13 +59,18 @@ public class StoryTesterImpl implements StoryTester {
         }
     }
 
-    private boolean runSentence(String[] subSentence, Method method, Object testClassInst,StoryTestExceptionImpl mangeStory
-    ,String line,TestClassBackUp backUp) {
+    private boolean runSentence(String[] subSentence, Method method, Object testClassInst,
+                                StoryTestExceptionImpl mangeStory, String line,TestClassBackUp backUp) {
         boolean lastChance = false;
         int count = 0;
+        ArrayList<String> allParams = new ArrayList<>();
+        ArrayList<String> allExp = new ArrayList<>();
         for (String sub : subSentence) {
             count++;
             Object[] paramsArray = findParameters(sub);
+            for (Object param: paramsArray){
+                allParams.add(param.toString());
+            }
             if(subSentence.length == count){
                 lastChance = true;
             }
@@ -76,11 +81,23 @@ public class StoryTesterImpl implements StoryTester {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
+                org.junit.ComparisonFailure e1 = (org.junit.ComparisonFailure) e.getCause();
+                allExp.add(e1.getActual().toString());
                 if(lastChance){
-                    org.junit.ComparisonFailure e1 = (org.junit.ComparisonFailure) e.getCause();
+
                     mangeStory.setNumberFailures();
-                    mangeStory.setActualValues(e1.getActual());
-                    mangeStory.setExpectedValues(e1.getExpected());
+
+                    if(mangeStory.getStoryExpected().isEmpty()){
+                        for (String param: allParams){
+                            mangeStory.setActualValues(param);
+                        }
+                    }
+                    if(mangeStory.getTestResult().isEmpty()){
+                        for(String exp: allExp){
+                            mangeStory.setExpectedValues(exp);
+                        }
+                    }
+
                     mangeStory.setStoryFailed(line);
                     return true;
                 }

@@ -47,12 +47,12 @@ public class StoryTestExceptionImpl extends StoryTestException {
 
     @Override
     public List<String> getStoryExpected() {
-        return expectedValues;
+        return actualValues;
     }
 
     @Override
     public List<String> getTestResult() {
-        return actualValues;
+        return expectedValues;
     }
 
     @Override

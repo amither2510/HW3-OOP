@@ -43,7 +43,7 @@ public class TestClassBackUp {
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field f : fields) {
             f.setAccessible(true);
-            if (f == null) {
+            if (f.get(object)==null) {
                 f.set(object_backup, null);
             } else {
                 //do shallow copy
