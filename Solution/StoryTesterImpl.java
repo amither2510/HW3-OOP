@@ -80,6 +80,7 @@ public class StoryTesterImpl implements StoryTester {
                     mangeStory.setActualValues(e1.getActual());
                     mangeStory.setExpectedValues(e1.getExpected());
                     mangeStory.setStoryFailed(line);
+                    //commit
                 }
             }
         }
