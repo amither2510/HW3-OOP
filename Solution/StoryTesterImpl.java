@@ -34,14 +34,15 @@ public class StoryTesterImpl implements StoryTester {
                     testClassInst= backUp.getObject_backup();
                 }
             }
+            if(mangeStory.getNumFail() >0 ){
+                throw mangeStory;
+            }
 
         }
         catch (WordNotFoundException e){
-            e.printStackTrace();
+           throw e;
         }
-        if(mangeStory.getNumFail() >0 ){
-            throw mangeStory;
-        }
+
     }
 
     private void backUpObject(String s, TestClassBackUp backUp, Object testClassInst) throws IllegalAccessException {
@@ -61,6 +62,7 @@ public class StoryTesterImpl implements StoryTester {
         boolean lastChance = false;
         int count = 0;
         for (String sub : subSentence) {
+            count++;
             Object[] paramsArray = findParameters(sub);
             if(subSentence.length == count){
                 lastChance = true;
@@ -73,16 +75,15 @@ public class StoryTesterImpl implements StoryTester {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
                 if(lastChance){
-                    ComparisonFailure e1 = (ComparisonFailure) e.getCause();
+                    org.junit.ComparisonFailure e1 = (org.junit.ComparisonFailure) e.getCause();
                     mangeStory.setNumberFailures();
                     mangeStory.setActualValues(e1.getActual());
                     mangeStory.setExpectedValues(e1.getExpected());
                     mangeStory.setStoryFailed(line);
                 }
             }
-            count++;
-
         }
+        //end of loop
     }
 
 
