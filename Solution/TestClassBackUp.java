@@ -9,20 +9,14 @@ public class TestClassBackUp {
     private boolean flag_backup;
     private Object object_backup;
 
-    public TestClassBackUp(Class<?> testClass) {
+    public TestClassBackUp(Class<?> testClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         flag_backup=false;
         try {
             Constructor<?> cons = testClass.getDeclaredConstructor();
             cons.setAccessible(true);
             object_backup = cons.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw e;
         }
     }
 
