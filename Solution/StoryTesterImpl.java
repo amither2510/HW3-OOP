@@ -45,7 +45,7 @@ public class StoryTesterImpl implements StoryTester {
 
     }
 
-    private void backUpObject(String s, TestClassBackUp backUp, Object testClassInst) throws IllegalAccessException {
+    private void backUpObject(String s, TestClassBackUp backUp, Object testClassInst) throws Exception {
         if(s.equals("When")){
             if(!backUp.isFlag_backup()){
                 backUp.setFlag_backup(true);
