@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class StoryTesterImpl implements StoryTester {
@@ -163,6 +164,9 @@ public class StoryTesterImpl implements StoryTester {
     }
 
     private String cleanParam(String s) {
+        if(!s.contains(" ")){
+            return s;
+        }
         String[] str = s.split(" and ");
         return String.join(" and ",Arrays.stream(str).map(m->m.substring(0, m.lastIndexOf(" "))).
                 collect(Collectors.toList()));
@@ -199,9 +203,97 @@ public class StoryTesterImpl implements StoryTester {
                         replaceAll(" \\&[^ ]*", "").equals(annotation_value))).
                         collect(Collectors.toList()).get(0);
     }
+
+
+
     @Override
     public void testOnNestedClasses(String story, Class<?> testClass) throws Exception {
-        if (story==null || testClass==null) throw new IllegalArgumentException();
-        //TODO: Implement
+        if (story == null || testClass == null) throw new IllegalArgumentException();
+        Constructor<?> cons = testClass.getDeclaredConstructor();
+        cons.setAccessible(true);
+        Object testClassInst = cons.newInstance();
+        try {
+            testOnInheritanceTree(story, testClass);
+        } catch (GivenNotFoundException e) {
+            if (testClass.equals(Object.class)) {
+                throw new GivenNotFoundException();
+            }
+            try {
+                Class<?>[] innerClasses = testClass.getDeclaredClasses();
+                if(InvokeSafelyTheInnerClasses(story, innerClasses, testClassInst)){
+                    testOnNestedClasses(story, testClass.getSuperclass());
+                }
+
+            }
+            catch (SucessForInnerException e4){
+                return;
+            }
+            catch ( StoryTestExceptionImpl e3) {
+                throw e3;
+            }
+        }
     }
+
+    private boolean InvokeSafelyTheInnerClasses(String story ,Class<?>[] innerClasses, Object fatherObject) throws Exception {
+        for(Class<?> innerClass :innerClasses){
+            Constructor<?> cons = innerClass.getDeclaredConstructor(fatherObject.getClass());
+            cons.setAccessible(true);
+            Object innerObject = cons.newInstance(fatherObject);
+            if(InvokeAndRunAssigment(story,innerClass,fatherObject.getClass(),fatherObject)){
+                InvokeSafelyTheInnerClasses(story,innerObject.getClass().getDeclaredClasses(),innerObject);
+            }
+        }
+        return true;
+    }
+
+    private Boolean InvokeAndRunAssigment(String story, Class<?> testClass, Class<?> fatherClass,Object instFather) throws Exception{
+        if (story==null || testClass==null) throw new IllegalArgumentException();
+        TestClassBackUp backUp = new TestClassBackUp(testClass,fatherClass,instFather);
+        StoryTestExceptionImpl mangeStory = new StoryTestExceptionImpl();
+        try {
+            String[] lines = story.split("\n");
+            Constructor<?> cons = testClass.getDeclaredConstructor(fatherClass);
+            cons.setAccessible(true);
+            Object testClassInst = cons.newInstance(instFather);
+
+            for (String str : lines) {
+                String[] subSentence = str.split(" or ");
+                Method method = findMethodFrom2TypeSentence(subSentence[0], testClass);
+                backUpObject(subSentence[0].split(" ",2)[0],backUp,testClassInst);
+                try{
+                    if(runSentence(subSentence,method,testClassInst,mangeStory,str,backUp)){
+                        testClassInst= backUp.getObject_backup();
+                    }
+                }catch (ComparisonFailure e){
+                    testClassInst= backUp.getObject_backup();
+                }
+            }
+            if(mangeStory.getNumFail() >0 ){
+                throw mangeStory;
+            }
+            throw new SucessForInnerException();
+        }
+        catch (GivenNotFoundException e){
+            return true;
+        }
+        catch (WhenNotFoundException | ThenNotFoundException e1){
+            throw e1;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

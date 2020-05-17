@@ -12,9 +12,22 @@ public class TestClassBackUp {
     public TestClassBackUp(Class<?> testClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         flag_backup=false;
         try {
+            Class<?> classez = testClass.getSuperclass();
             Constructor<?> cons = testClass.getDeclaredConstructor();
             cons.setAccessible(true);
             object_backup = cons.newInstance();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+    public TestClassBackUp(Class<?> testClass,Class<?> fatherClass,Object instFather) throws InvocationTargetException,
+            NoSuchMethodException, InstantiationException, IllegalAccessException {
+        flag_backup=false;
+        try {
+            Class<?> classez = testClass.getSuperclass();
+            Constructor<?> cons = testClass.getDeclaredConstructor(fatherClass);
+            cons.setAccessible(true);
+            object_backup = cons.newInstance(instFather);
         } catch (Exception e) {
             throw e;
         }

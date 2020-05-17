@@ -98,7 +98,7 @@ public class MyTest {
                 + "When C's y is 3\n"
                 + "Then C's y is 2\n" // Should fail.
                 + "When DO NOTHING\n"
-                + "Then C's y is 2" // This one should succeed (backed-up).
+                + "Then C's y is 3" // This one should succeed (backed-up).
         ;
 
         Story11 = "Given C of Inner x 4\n"

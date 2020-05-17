@@ -28,8 +28,6 @@ public class DogTest {
 	@Before
 	public void setUp() throws Exception {
 		goodStory = "Given a Dog of age 6\n"
-				+ "When the dog is not taken out for a walk, the number of hours is 9\n"
-				+ "Then the house condition is clean\n"
 				+ "When the dog is not taken out for a walk, the number of hours is 5\n"
 				+ "Then the house condition is clean";
 		
