@@ -180,7 +180,7 @@ public class StoryTesterImpl implements StoryTester {
             } else{
                 return getMethodsThenAnnotation(equal_str, testClass);
             }
-        } catch (IndexOutOfBoundsException e) {  //TODO:: Exception
+        } catch (IndexOutOfBoundsException e) {
             String[] array = str.split(" ", 2);
             if(testClass.equals(Object.class)){
                 if (array[0].equals("Given")) {
