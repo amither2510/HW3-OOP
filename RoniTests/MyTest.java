@@ -28,6 +28,7 @@ public class MyTest {
     private String Story12;
     private Class<?> testClass;
 
+
     @Before
     public void setUp() {
         Story1 = "Given A of x 4\n"
