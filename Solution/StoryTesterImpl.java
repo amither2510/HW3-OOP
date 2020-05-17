@@ -29,7 +29,7 @@ public class StoryTesterImpl implements StoryTester {
                 Method method = findMethodFrom2TypeSentence(subSentence[0], testClass);
                 backUpObject(subSentence[0].split(" ",2)[0],backUp,testClassInst);
                 try{
-                    runSentence(subSentence,method,testClassInst,mangeStory,str);
+                    runSentence(subSentence,method,testClassInst,mangeStory,str,backUp);
                 }catch (ComparisonFailure e){
                     testClassInst= backUp.getObject_backup();
                 }
@@ -58,7 +58,7 @@ public class StoryTesterImpl implements StoryTester {
     }
 
     private void runSentence(String[] subSentence, Method method, Object testClassInst,StoryTestExceptionImpl mangeStory
-    ,String line) {
+    ,String line,TestClassBackUp backUp) {
         boolean lastChance = false;
         int count = 0;
         for (String sub : subSentence) {
@@ -80,7 +80,7 @@ public class StoryTesterImpl implements StoryTester {
                     mangeStory.setActualValues(e1.getActual());
                     mangeStory.setExpectedValues(e1.getExpected());
                     mangeStory.setStoryFailed(line);
-                    //commit
+                    testClassInst= backUp.getObject_backup();
                 }
             }
         }
