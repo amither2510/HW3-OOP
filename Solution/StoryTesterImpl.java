@@ -40,8 +40,7 @@ public class StoryTesterImpl implements StoryTester {
             e.printStackTrace();
         }
         if(mangeStory.getNumFail() >0 ){
-            //Todo to change
-            throw new ComparisonFailure("a","b","c");
+            throw mangeStory;
         }
     }
 
@@ -74,8 +73,6 @@ public class StoryTesterImpl implements StoryTester {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
                 if(lastChance){
-                    //todo check with yahav if true
-                    // story failed all the then failed
                     ComparisonFailure e1 = (ComparisonFailure) e.getCause();
                     mangeStory.setNumberFailures();
                     mangeStory.setActualValues(e1.getActual());

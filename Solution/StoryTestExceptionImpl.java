@@ -10,17 +10,22 @@ public class StoryTestExceptionImpl extends StoryTestException {
     private List<String> actualValues;
     private List<String> expectedValues;
     private int numberFailures;
+    private boolean setFirst;
 
     public StoryTestExceptionImpl() {
         actualValues = new ArrayList<>();
         expectedValues = new ArrayList<>();
         numberFailures =0;
         storyFailed =null;
+        setFirst= true;
 
     }
 
     public void setStoryFailed(String storyFailed) {
-        this.storyFailed = storyFailed;
+        if(setFirst) {
+            this.storyFailed = storyFailed;
+        }
+        setFirst=false;
     }
 
     public void setActualValues(String actualValues) {
